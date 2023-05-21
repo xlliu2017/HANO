@@ -1,6 +1,6 @@
 # [NeurIPS 2023] Mitigating spectral bias for the multiscale operator learning with hierarchical attention
 
-# Datasets
+##  Datasets
 The data is courtesy of [Zongyi Li (Caltech)](https://github.com/zongyi-li/fourier_neural_operator)  under the MIT license. Download the following data from [here](https://drive.google.com/drive/folders/1UnbQh2WWc6knEHbLn-ZaXrKUZhp7pjt-?usp=sharing):
 <br>`piececonst_r421_N1024_smooth1.mat`
 <br>`piececonst_r421_N1024_smooth2.mat`
@@ -19,27 +19,43 @@ The data of the multiscale trigonometric coefficient can be downloaded from [her
 <br>`mul_tri_val.mat`
 <br>`mul_tri_test.mat`
 
-# Examples
+## Requirements
+
+To install requirements:
+
+```setup
+pip install -r requirements.txt
+```
+
+##  Training
 Please put all the data into the ./data folder.
 
 Run the 'ex_darcysmooth.py' to reproduce the  darcy smooth experiment with resolution = 211 by
-```bash
+```train
 python ex_darcysmooth.py  
 ```
 
 Run the 'ex_darcyrough.py' to reproduce the  darcy rough experiment with resolution = 256 by
-```bash
+```train
 python ex_darcyrough.py 
 ```
   
 Run the 'ex_multiscale.py' to reproduce the multiscale trigonometric coefficient experiment with resolution = 256 by
-```bash
+```train
 python ex_multiscale.py 
 ```
 
-# Pre-trained models
-Please download the pretrained model's .pt files from [here](https://drive.google.com/drive/folders/1Tnjh7Vnr_lmdYpePl60ZHuYTzfcz_8Zl?usp=share_link) and put them in the ./models folder.
-Run the 'eval.py' to load pre-trained models and reproduce the experimental results. The result(.mat) file will be generated under the ./results folder. 
-```bash
+
+## Evaluation
+To evaluate my model on darcy rough, run:
+
+```eval
 python eval.py 
 ```
+The result(.mat) file will be generated under the ./results folder. 
+
+##  Pre-trained models
+You can download pretrained models [here](https://drive.google.com/drive/folders/1Tnjh7Vnr_lmdYpePl60ZHuYTzfcz_8Zl?usp=share_link):
+- [darcyrough_res256.pt](https://drive.google.com/file/d/14GQMdM573oCNIJNWO_pcvUpTim7vmw0O/view?usp=share_link) trained on darcy rough in section 4.2 with resolution=256.
+- [multiscale_res256.pt](https://drive.google.com/file/d/1uPX38qqEastYhp7_iH3MbHB0PSXP6lDc/view?usp=share_link) trained on multiscale trigonometric coefficient in section 4.2 with resolution=256.
+Put them in the ./models folder.
