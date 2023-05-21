@@ -4,11 +4,123 @@ import torch.nn as nn
 from functools import partial
 import torch.nn.functional as F
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
-
 from torchinfo import summary
 
+
+# --------------------------------------------------------------------------------
+# Code of the model
+
+class HANO2d(nn.Module):
+    '''
+        input shape: [batch, 1, res, res]
+        output shape: [batch, res, res ,1]
+    '''
+    def __init__(self, R_dic):
+        super(HANO2d, self).__init__()
+        self.boundary_condition = R_dic['boundary_condition']
+        self.feature_dim = R_dic['feature_dim']
+        self.dropout = 0.0
+
+        if 'in_dim' not in R_dic:
+            R_dic['in_dim'] = 1
+
+        # self.grid = R_dic['grid']
+        # self.addpos = R_dic['addpos'] if 'addpos' in R_dic else 0
+
+        self.resatt = R_dic['res_att']
+
+        self.encoder = PatchEmbed(patch_size=R_dic['patch_size'], in_chans=R_dic['in_dim'],
+                                  embed_dim=self.feature_dim, stride=R_dic['subsample_attn'],
+                                  patch_padding=R_dic['patch_padding'])
+
+        self.attn = HAttention(in_chans=self.feature_dim, depths=R_dic['depths'],
+                               num_heads=R_dic['num_heads'], window_size=R_dic['window_size'])
+
+        self.decoder = Decodermap(modes=R_dic['F_modes'], width=R_dic['F_width'], num_spectral_layers=R_dic['num_spectral_layers'],
+                                  mlp_hidden_dim=R_dic['mlp_hidden_dim'], padding=R_dic['F_padding'], resolution=R_dic['res_output'])
+
+        self.apply(self._init_weights)
+        if 'y_norm' in R_dic:
+            self.y_norm = R_dic['y_norm']
+        else:
+            self.y_norm = None
+
+    def _init_weights(self, m):
+        if isinstance(m, nn.Linear):
+            trunc_normal_(m.weight, std=.02)
+            if isinstance(m, nn.Linear) and m.bias is not None:
+                nn.init.constant_(m.bias, 0)
+        elif isinstance(m, nn.LayerNorm):
+            nn.init.constant_(m.bias, 0)
+            nn.init.constant_(m.weight, 1.0)
+
+    def forward(self, x):
+        x = self.encoder(x)
+        B, L, C = x.shape
+        x = x.view(B, self.resatt, self.resatt, C)
+
+        x = self.attn(x)
+        # x.shape = [b,res_attn, res_attn,feature]
+
+        x = self.decoder(x)
+        # x.shape = [b,res_out,res_out,1]
+
+        if self.y_norm is not None:
+            x = torch.squeeze(x, dim=-1)
+            x = self.y_norm.decode(x)
+            x = torch.unsqueeze(x, dim=-1)
+
+        if self.boundary_condition == 'dirichlet':
+            x = x[:, 1:-1, 1:-1].contiguous()
+            x = F.pad(x, (0, 0, 1, 1, 1, 1), "constant", 0)
+
+        return x
+    
+    
+class HTransformerBlock(nn.Module):
+
+    def __init__(self, dim, num_heads, window_size=7, mlp_ratio=4., qkv_bias=True, qk_scale=None,
+                 drop=0., attn_drop=0., drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm):
+        super().__init__()
+        self.dim = dim
+        self.num_heads = num_heads
+        self.window_size = window_size
+        self.mlp_ratio = mlp_ratio
+
+        self.norm1 = norm_layer(dim)
+        self.attn = WindowAttention(
+            dim, window_size=to_2tuple(self.window_size), num_heads=num_heads,
+            qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop)
+
+        self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
+        self.norm2 = norm_layer(dim)
+        mlp_hidden_dim = int(dim * mlp_ratio)
+        self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
+
+    def forward(self, x):
+        B, H, W, C = x.shape
+
+        shortcut = x
+        x = self.norm1(x)
+
+        # partition windows
+        x_windows = window_partition(x, self.window_size)  # nW*B, window_size, window_size, C
+        x_windows = x_windows.view(-1, self.window_size * self.window_size, C)  # nW*B, window_size*window_size, C
+
+
+        attn_windows = self.attn(x_windows)  # nW*B, window_size*window_size, C
+
+        # merge windows
+        attn_windows = attn_windows.view(-1, self.window_size, self.window_size, C)
+        x = window_reverse(attn_windows, self.window_size, H, W)  # B H' W' C
+
+        x = shortcut + self.drop_path(x)
+        x = x + self.drop_path(self.mlp(self.norm2(x)))
+
+        return x
+    
 # =========================================================================
-# The code references in this section are from https://github.com/microsoft/Swin-Transformer.
+
 class Mlp(nn.Module):
     def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0.):
         super().__init__()
@@ -41,7 +153,7 @@ def window_reverse(windows, window_size, H, W):
     return x
 
 class WindowAttention(nn.Module):
-
+    # The code references in this section are from https://github.com/microsoft/Swin-Transformer.
     def __init__(self, dim, window_size, num_heads, qkv_bias=True, qk_scale=None, attn_drop=0., proj_drop=0.):
 
         super().__init__()
@@ -151,47 +263,7 @@ class PatchEmbed(nn.Module):
 
         return x
 
-class HTransformerBlock(nn.Module):
 
-    def __init__(self, dim, num_heads, window_size=7, mlp_ratio=4., qkv_bias=True, qk_scale=None,
-                 drop=0., attn_drop=0., drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm):
-        super().__init__()
-        self.dim = dim
-        self.num_heads = num_heads
-        self.window_size = window_size
-        self.mlp_ratio = mlp_ratio
-
-        self.norm1 = norm_layer(dim)
-        self.attn = WindowAttention(
-            dim, window_size=to_2tuple(self.window_size), num_heads=num_heads,
-            qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop)
-
-        self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
-        self.norm2 = norm_layer(dim)
-        mlp_hidden_dim = int(dim * mlp_ratio)
-        self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
-
-    def forward(self, x):
-        B, H, W, C = x.shape
-
-        shortcut = x
-        x = self.norm1(x)
-
-        # partition windows
-        x_windows = window_partition(x, self.window_size)  # nW*B, window_size, window_size, C
-        x_windows = x_windows.view(-1, self.window_size * self.window_size, C)  # nW*B, window_size*window_size, C
-
-
-        attn_windows = self.attn(x_windows)  # nW*B, window_size*window_size, C
-
-        # merge windows
-        attn_windows = attn_windows.view(-1, self.window_size, self.window_size, C)
-        x = window_reverse(attn_windows, self.window_size, H, W)  # B H' W' C
-
-        x = shortcut + self.drop_path(x)
-        x = x + self.drop_path(self.mlp(self.norm2(x)))
-
-        return x
 
 # =========================================================================
 class ReduceLayer(nn.Module):
@@ -464,74 +536,7 @@ class HAttention(nn.Module):
 
         return x
 
-# --------------------------------------------------------------------------------
-# Code of the model
 
-class HANO2d(nn.Module):
-    '''
-        input shape: [batch, 1, res, res]
-        output shape: [batch, res, res ,1]
-    '''
-    def __init__(self, R_dic):
-        super(HANO2d, self).__init__()
-        self.boundary_condition = R_dic['boundary_condition']
-        self.feature_dim = R_dic['feature_dim']
-        self.dropout = 0.0
-
-        if 'in_dim' not in R_dic:
-            R_dic['in_dim'] = 1
-
-        # self.grid = R_dic['grid']
-        # self.addpos = R_dic['addpos'] if 'addpos' in R_dic else 0
-
-        self.resatt = R_dic['res_att']
-
-        self.encoder = PatchEmbed(patch_size=R_dic['patch_size'], in_chans=R_dic['in_dim'],
-                                  embed_dim=self.feature_dim, stride=R_dic['subsample_attn'],
-                                  patch_padding=R_dic['patch_padding'])
-
-        self.attn = HAttention(in_chans=self.feature_dim, depths=R_dic['depths'],
-                               num_heads=R_dic['num_heads'], window_size=R_dic['window_size'])
-
-        self.decoder = Decodermap(modes=R_dic['F_modes'], width=R_dic['F_width'], num_spectral_layers=R_dic['num_spectral_layers'],
-                                  mlp_hidden_dim=R_dic['mlp_hidden_dim'], padding=R_dic['F_padding'], resolution=R_dic['res_output'])
-
-        self.apply(self._init_weights)
-        if 'y_norm' in R_dic:
-            self.y_norm = R_dic['y_norm']
-        else:
-            self.y_norm = None
-
-    def _init_weights(self, m):
-        if isinstance(m, nn.Linear):
-            trunc_normal_(m.weight, std=.02)
-            if isinstance(m, nn.Linear) and m.bias is not None:
-                nn.init.constant_(m.bias, 0)
-        elif isinstance(m, nn.LayerNorm):
-            nn.init.constant_(m.bias, 0)
-            nn.init.constant_(m.weight, 1.0)
-
-    def forward(self, x):
-        x = self.encoder(x)
-        B, L, C = x.shape
-        x = x.view(B, self.resatt, self.resatt, C)
-
-        x = self.attn(x)
-        # x.shape = [b,res_attn, res_attn,feature]
-
-        x = self.decoder(x)
-        # x.shape = [b,res_out,res_out,1]
-
-        if self.y_norm is not None:
-            x = torch.squeeze(x, dim=-1)
-            x = self.y_norm.decode(x)
-            x = torch.unsqueeze(x, dim=-1)
-
-        if self.boundary_condition == 'dirichlet':
-            x = x[:, 1:-1, 1:-1].contiguous()
-            x = F.pad(x, (0, 0, 1, 1, 1, 1), "constant", 0)
-
-        return x
 
 if __name__ == "__main__":
     R_dic = {}
