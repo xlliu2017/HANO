@@ -61,7 +61,7 @@ The result(.mat) file will be generated under the ./results folder.
 You can download pretrained models [here](https://drive.google.com/drive/folders/1Tnjh7Vnr_lmdYpePl60ZHuYTzfcz_8Zl?usp=share_link):
 - [darcyrough_res256.pt](https://drive.google.com/file/d/14GQMdM573oCNIJNWO_pcvUpTim7vmw0O/view?usp=share_link) trained on darcy rough in section 4.2 with resolution=256.
 - [multiscale_res256.pt](https://drive.google.com/file/d/1uPX38qqEastYhp7_iH3MbHB0PSXP6lDc/view?usp=share_link) trained on multiscale trigonometric coefficient in section 4.2 with resolution=256.
-- [FNO_multiscale_res256.pt]([https://drive.google.com/file/d/1uPX38qqEastYhp7_iH3MbHB0PSXP6lDc/view?usp=share_link](https://drive.google.com/file/d/1MZAIQhBjVh0-ja-Q6vi17kxYl9X5pKTw/view?usp=share_link)) trained on multiscale trigonometric coefficient by FNO with resolution=256.
+- [FNO_multiscale_res256.pt](https://drive.google.com/file/d/1MZAIQhBjVh0-ja-Q6vi17kxYl9X5pKTw/view?usp=share_link) trained on multiscale trigonometric coefficient by FNO with resolution=256.
 
 
 Put them in the ./models folder.
