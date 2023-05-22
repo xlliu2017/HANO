@@ -1,8 +1,7 @@
 from train import *
 
 SRC_ROOT = os.path.dirname(os.path.abspath(__file__))
-# DATA_PATH = os.path.join(SRC_ROOT, 'data')
-DATA_PATH = 'E:/SJTU/torch_project/HT-net/data'
+DATA_PATH = os.path.join(SRC_ROOT, 'data')
 MODEL_PATH = os.path.join(SRC_ROOT, 'models')
 
 
@@ -11,12 +10,9 @@ if __name__ == "__main__":
 
     R_dic['model'] = 'FNO'
 
-    # R_dic['train_path'] = 'mul_tri_train.mat'
-    # R_dic['val_path'] = 'mul_tri_val.mat'
-    # R_dic['test_path'] = 'mul_tri_test.mat'
-    R_dic['train_path'] = 'gamblet_train.mat'
-    R_dic['val_path'] = 'gamblet_val.mat'
-    R_dic['test_path'] = 'gamblet_test.mat'
+    R_dic['train_path'] = 'mul_tri_train.mat'
+    R_dic['val_path'] = 'mul_tri_val.mat'
+    R_dic['test_path'] = 'mul_tri_test.mat'
 
     R_dic['Data_path'] = DATA_PATH
     R_dic['train_len'] = 1000
