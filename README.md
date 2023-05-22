@@ -26,6 +26,9 @@ To install requirements:
 ```setup
 pip install -r requirements.txt
 ```
+## Spectral bias 
+The spectral bias eperiments are illustrated in ./spectral_bias/spectral_bias_dynamics.ipynb
+![image1](spectral_bias.png)
 
 ##  Training
 Please put all the data into the ./data folder.
