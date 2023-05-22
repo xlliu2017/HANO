@@ -2,7 +2,7 @@ import torch
 from train import *
 
 SRC_ROOT = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = 'E:/SJTU/torch_project/HT-net/data'
+DATA_PATH = os.path.join(SRC_ROOT, 'data')
 MODEL_PATH = os.path.join(SRC_ROOT, 'models')
 
 def test_model(R_dic):
