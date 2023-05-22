@@ -160,7 +160,8 @@ def train_model(R_dic):
     # ==================== Load model, optimizer, learning rate scheduler, loss function ====================
     if R_dic['model'] == 'HANO':
         model = HANO2d(R_dic)
-
+    elif R_dic['model'] == 'FNO':
+        model = FNO2d(R_dic)
     model = model.to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=8e-4, weight_decay=1e-4)
