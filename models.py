@@ -119,7 +119,7 @@ class HTransformerBlock(nn.Module):
 
         return x
     
-# =========================================================================
+
 
 class Mlp(nn.Module):
     def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0.):
@@ -196,8 +196,7 @@ class WindowAttention(nn.Module):
         qkv = self.qkv(x).reshape(B_, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
         q, k, v = qkv[0], qkv[1], qkv[2]  # make torchscript happy (cannot use tensor as tuple)
 
-        # 不使用softmax, 则需要 QK^T/n, 故去掉self.scale
-        # q = q * self.scale
+
         seq_len = q.size(-2)
         attn = (q @ k.transpose(-2, -1))
         attn = attn / seq_len
@@ -218,8 +217,7 @@ class WindowAttention(nn.Module):
         return f'dim={self.dim}, window_size={self.window_size}, num_heads={self.num_heads}'
 
 class PatchMerging(nn.Module):
-    r""" Patch Merging Layer.
-
+    """ 
     Args:
         dim (int): Number of input channels.
         norm_layer (nn.Module, optional): Normalization layer.  Default: nn.LayerNorm
@@ -265,7 +263,6 @@ class PatchEmbed(nn.Module):
 
 
 
-# =========================================================================
 class ReduceLayer(nn.Module):
     def __init__(self, dim, depth, num_heads, window_size, mlp_ratio=4., qkv_bias=True, qk_scale=None,
                  drop=0., attn_drop=0., drop_path=0., norm_layer=nn.LayerNorm, downsample=None):
@@ -377,7 +374,7 @@ class SpectralConv2d(nn.Module):
         # (batch, in_channel, x, y), (in_channel, out_channel, x, y) -> (batch, out_channel, x, y)
         op = partial(torch.einsum, "bixy,ioxy->boxy")
         return torch.stack([
-            op(a[..., 0], b[..., 0]) - op(a[..., 1], b[..., 1]),  # a[..., 0], b[..., 0]都是实部，a[..., 1], b[..., 1]都是虚部
+            op(a[..., 0], b[..., 0]) - op(a[..., 1], b[..., 1]),  
             op(a[..., 1], b[..., 0]) + op(a[..., 0], b[..., 1])
         ], dim=-1)
 
@@ -443,9 +440,6 @@ class Decodermap(nn.Module):
         x = x.permute(0, 3, 1, 2)
         if self.padding:
             x = F.pad(x, [0, self.padding, 0, self.padding])
-            # 矩阵上下左右侧扩充
-            # 矩阵右侧和下侧扩充padding列行， 值全0.  x.size() = (batch_size,width,s+padding,s+padding)
-            # 此时x为初始迭代值
 
         x1 = self.Spectral_Conv_List[0](x)
         x2 = self.Conv2d_list[0](x)
@@ -510,15 +504,6 @@ class HAttention(nn.Module):
         elif isinstance(m, nn.LayerNorm):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
-
-
-    @torch.jit.ignore
-    def no_weight_decay(self):
-        return {'absolute_pos_embed'}
-
-    @torch.jit.ignore
-    def no_weight_decay_keywords(self):
-        return {'relative_position_bias_table'}
 
     def forward(self, x):
         list_x_out = []
