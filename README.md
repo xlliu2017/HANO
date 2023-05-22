@@ -34,6 +34,10 @@ The spectral bias eperiments are illustrated in ./spectral_bias/spectral_bias_dy
 You can download the results of different operator learning methods from [here](https://drive.google.com/drive/folders/1mgs-Yc8wz6TDUUw1OtQJc8sMpqLuaoDZ?usp=share_link).
 ![image2](Error_Spectrum.png)
 
+## Baselines
+We present a comprehensive comparisons with baselines in terms of two metric;
+![table1](baseline.png)
+
 ##  Training
 Please put all the data into the ./data folder.
 
