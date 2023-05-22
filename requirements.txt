@@ -1,54 +1,18 @@
-brotlipy==0.7.0
-certifi==2022.12.7
-cffi @ file:///C:/b/abs_49n3v2hyhr/croot/cffi_1670423218144/work
-charset-normalizer @ file:///tmp/build/80754af9/charset-normalizer_1630003229654/work
-colorama @ file:///C:/b/abs_a9ozq0l032/croot/colorama_1672387194846/work
-cryptography @ file:///C:/b/abs_8ecplyc3n2/croot/cryptography_1677533105000/work
-cycler @ file:///tmp/build/80754af9/cycler_1637851556182/work
-filelock==3.8.0
-flit_core @ file:///opt/conda/conda-bld/flit-core_1644941570762/work/source/flit_core
-fonttools==4.25.0
-h5py @ file:///C:/ci/h5py_1659089830381/work
+h5py 
 hdf5storage==0.1.19
-huggingface-hub==0.11.1
-idna @ file:///C:/b/abs_bdhbebrioa/croot/idna_1666125572046/work
 kaleido==0.2.1
-kiwisolver @ file:///C:/b/abs_88mdhvtahm/croot/kiwisolver_1672387921783/work
-matplotlib @ file:///C:/b/abs_ae02atcfur/croot/matplotlib-suite_1667356722968/work
 mkl-fft==1.3.1
-mkl-random @ file:///C:/ci_310/mkl_random_1643050563308/work
+mkl-random 
 mkl-service==2.4.0
 mpmath==1.2.1
 munkres==1.1.4
-numpy @ file:///C:/b/abs_datssh7cer/croot/numpy_and_numpy_base_1672336199388/work
-packaging @ file:///C:/b/abs_cfsup8ur87/croot/packaging_1671697442297/work
+numpy
 Pillow==9.4.0
-plotly @ file:///C:/ci/plotly_1658160673416/work
-ply==3.11
-psutil @ file:///C:/Windows/Temp/abs_b2c2fd7f-9fd5-4756-95ea-8aed74d0039flsd9qufz/croots/recipe/psutil_1656431277748/work
-pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
-pyOpenSSL @ file:///C:/b/abs_552w85x1jz/croot/pyopenssl_1677607703691/work
-pyparsing @ file:///C:/Users/BUILDE~1/AppData/Local/Temp/abs_7f_7lba6rl/croots/recipe/pyparsing_1661452540662/work
-PyQt5==5.15.7
-PyQt5-sip @ file:///C:/Windows/Temp/abs_d7gmd2jg8i/croots/recipe/pyqt-split_1659273064801/work/pyqt_sip
-PySocks @ file:///C:/ci_310/pysocks_1642089375450/work
-python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+plotly 
 PyYAML==6.0
-requests @ file:///C:/ci/requests_1657735340829/work
 scipy==1.9.3
-sip @ file:///C:/Windows/Temp/abs_b8fxd17m2u/croots/recipe/sip_1659012372737/work
-six @ file:///tmp/build/80754af9/six_1644875935023/work
-sympy @ file:///C:/b/abs_95fbf1z7n6/croot/sympy_1668202411612/work
-tenacity @ file:///C:/Windows/TEMP/abs_980d07a6-8e21-4174-9c17-7296219678ads7dhdov_/croots/recipe/tenacity_1657899108023/work
 timm==0.6.12
-toml @ file:///tmp/build/80754af9/toml_1616166611790/work
 torch==1.13.0
-torchaudio==0.13.0
-torchinfo @ file:///home/conda/feedstock_root/build_artifacts/torchinfo_1675650609830/work
-torchvision @ file:///C:/b/abs_88nq4vr9ec/croot/torchvision_1670313558208/work
-tornado @ file:///C:/ci/tornado_1662476985533/work
-tqdm @ file:///C:/b/abs_0axbz66qik/croots/recipe/tqdm_1664392691071/work
-typing_extensions @ file:///C:/b/abs_89eui86zuq/croot/typing_extensions_1669923792806/work
-urllib3 @ file:///C:/b/abs_9bcwxczrvm/croot/urllib3_1673575521331/work
-win-inet-pton @ file:///C:/ci_310/win_inet_pton_1642658466512/work
-wincertstore==0.2
+torchinfo 
+torchvision 
+tqdm
