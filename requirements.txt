@@ -16,3 +16,4 @@ torch==1.13.0
 torchinfo 
 torchvision 
 tqdm
+pickle
