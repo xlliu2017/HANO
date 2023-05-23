@@ -8,8 +8,8 @@ MODEL_PATH = os.path.join(SRC_ROOT, 'models')
 
 
 if __name__ == "__main__":
+    # HANO-s
     R_dic = {}
-
     R_dic['train_path'] = 'NavierStokes_V1e-5_N1200_T20.mat'
     R_dic['test_path'] = 'NavierStokes_V1e-5_N1200_T20.mat'
     R_dic['Data_path'] = DATA_PATH
@@ -17,45 +17,10 @@ if __name__ == "__main__":
     R_dic['train_len'] = 1000
     R_dic['test_len'] = 200
     R_dic['resolution_datasets'] = 64  # resolution of data sets
-    R_dic['batch_size'] = 8
+    R_dic['batch_size'] = 20
     R_dic['T'] = 10
     R_dic['T_in'] = 10
     R_dic['in_dim'] = R_dic['T_in']
-
-    # R_dic['train_path'] = 'ns_V1e-3_N5000_T50.mat'
-    # R_dic['test_path'] = 'ns_V1e-3_N5000_T50.mat'
-    # R_dic['boundary_condition'] = None
-    # R_dic['train_len'] = 1000
-    # R_dic['test_len'] = 100
-    # R_dic['resolution_datasets'] = 64  # resolution of data sets
-    # R_dic['batch_size'] = 8
-    # R_dic['T'] = 40
-    # R_dic['T_in'] = 10
-    # R_dic['in_dim'] = R_dic['T_in']
-
-    # R_dic['train_path'] = 'ns_V1e-4_N10000_T30.mat'
-    # R_dic['test_path'] = 'ns_V1e-4_N10000_T30.mat'
-    # R_dic['boundary_condition'] = None
-    # R_dic['train_len'] = 1000
-    # R_dic['test_len'] = 100
-    # R_dic['resolution_datasets'] = 64  # resolution of data sets
-    # R_dic['batch_size'] = 8
-    # R_dic['T'] = 20
-    # R_dic['T_in'] = 10
-    # R_dic['in_dim'] = R_dic['T_in']
-
-    # R_dic['train_path'] = 'ns_V1e-4_N10000_T30.mat'
-    # R_dic['test_path'] = 'ns_V1e-4_N10000_T30.mat'
-    # R_dic['boundary_condition'] = None
-    # R_dic['train_len'] = 9000
-    # R_dic['test_len'] = 1000
-    # R_dic['resolution_datasets'] = 64  # resolution of data sets
-    # R_dic['batch_size'] = 8
-    # R_dic['T'] = 20
-    # R_dic['T_in'] = 10
-    # R_dic['in_dim'] = R_dic['T_in']
-
-    R_dic['losstype'] = 'H1'
 
     R_dic['xGN'] = False
     R_dic['subsample_nodes'] = 1
@@ -67,14 +32,14 @@ if __name__ == "__main__":
     R_dic['res_output'] = 64
 
     R_dic['epochs'] = 500
-    R_dic['feature_dim'] = 20  # feature dim, in order to enhance expressiveness
+    R_dic['feature_dim'] = 18  # feature dim, in order to enhance expressiveness
     R_dic['window_size'] = [4, 4, 4]
-    R_dic['depths'] = [2, 4, 2]
+    R_dic['depths'] = [1, 1, 1]
     R_dic['num_heads'] = [1, 1, 1]
 
     R_dic['F_modes'] = 12  # modes of FNO
-    R_dic['F_width'] = 20
-    R_dic['num_spectral_layers'] = 4
+    R_dic['F_width'] = 18
+    R_dic['num_spectral_layers'] = 5
     R_dic['mlp_hidden_dim'] = 128
     R_dic['F_padding'] = 5
 
