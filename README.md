@@ -170,8 +170,7 @@ If you use this code or paper, please cite:
 
 ```bibtex
 @inproceedings{liu2023hano,
-  title     = {Mitigating spectral bias for the multiscale operator learning
-               with hierarchical attention},
+  title     = {Mitigating spectral bias for the multiscale operator learning with hierarchical attention},
   author    = {Liu, Xinliang and others},
   booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
   year      = {2023}

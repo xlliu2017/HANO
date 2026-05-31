@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+# Each pair is (pre_smoothing_steps, post_smoothing_steps) for one multigrid level.
 DEFAULT_NUM_ITERATION = ((1, 0), (1, 0), (1, 0))
 
 
@@ -121,7 +122,7 @@ class MultigridAttentionBlock(nn.Module):
             if level == 0 and pre_smooth_steps < 1:
                 raise ValueError(
                     "The first multigrid level requires at least one pre-smoothing step "
-                    "(pre_smooth_steps must be >= 1)."
+                    "(num_iteration[0][0] must be >= 1)."
                 )
 
             self.pre_smoothers.append(
@@ -224,8 +225,22 @@ class MultigridAttentionBlock(nn.Module):
 class HANO2d(nn.Module):
     """Hierarchical Attention Neural Operator with a multigrid-attention backbone."""
 
-    def __init__(self, config):
+    def __init__(self, config=None, **kwargs):
         super().__init__()
+        if config is None:
+            config = kwargs.pop("r_dic", None)
+        elif "r_dic" in kwargs:
+            merged_config = dict(kwargs.pop("r_dic"))
+            merged_config.update(config)
+            config = merged_config
+
+        if config is None:
+            config = kwargs.pop("config", None)
+
+        config = {} if config is None else dict(config)
+        if kwargs:
+            config.update(kwargs)
+
         self.boundary_condition = config.get("boundary_condition")
         self.input_channels = config.get("in_dim", 1)
         self.latent_channels = config.get("feature_dim", 24)
@@ -235,6 +250,8 @@ class HANO2d(nn.Module):
         self.normalizer = config.get("y_norm")
         self.use_input_residual = config.get("use_input_residual", False)
 
+        # Preserve explicit padding settings; otherwise choose a sensible default
+        # from the boundary condition used by the PDE experiment.
         padding_mode = config.get("padding_mode")
         if padding_mode is None:
             padding_mode = "zeros" if self.boundary_condition == "dirichlet" else "circular"
@@ -301,6 +318,9 @@ class HANO2d(nn.Module):
 
         depths = config.get("depths")
         if depths:
+            # Legacy experiment files described each level with `depths`. The new
+            # block interprets that count as pre-smoothing steps and defaults the
+            # post-smoothing count to zero for backward compatibility.
             return [(int(depth), 0) for depth in depths]
 
         return [tuple(iteration) for iteration in DEFAULT_NUM_ITERATION]
