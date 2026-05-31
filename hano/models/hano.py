@@ -119,7 +119,10 @@ class MultigridAttentionBlock(nn.Module):
         for level, (pre_smooth_steps, post_smooth_steps) in enumerate(self.num_iteration):
             level_channels = (level + 1) * num_feature_channels
             if level == 0 and pre_smooth_steps < 1:
-                raise ValueError("The first multigrid level requires at least one pre-smoothing step.")
+                raise ValueError(
+                    "The first multigrid level requires at least one pre-smoothing step "
+                    "(pre_smooth_steps must be >= 1)."
+                )
 
             self.pre_smoothers.append(
                 nn.Sequential(
@@ -270,7 +273,7 @@ class HANO2d(nn.Module):
         elif config.get("last_layer") == "linear":
             self.output_projection = nn.Conv2d(self.latent_channels, self.output_dim, kernel_size=1, bias=False)
         else:
-            raise NameError("invalid last_layer")
+            raise NameError('invalid last_layer: must be "conv" or "linear"')
 
         self.activation = self._build_activation(config.get("activation", "gelu"))
 
@@ -289,7 +292,7 @@ class HANO2d(nn.Module):
             return nn.Tanh()
         if name == "silu":
             return nn.SiLU()
-        raise NameError("invalid activation")
+        raise NameError('invalid activation: must be one of "relu", "gelu", "tanh", or "silu"')
 
     @staticmethod
     def _resolve_num_iteration(config):
