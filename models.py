@@ -14,10 +14,11 @@ from hano.models.components import (
     window_reverse,
 )
 from hano.models.fno import SpectralConv2d_FNO
-from hano.models.hano import Decodermap, HAttention, SpectralConv2d
+from hano.models.hano import Conv2dAttention, HANO, MgConv_DC_3, Restrict
 
 __all__ = [
     "HANO2d",
+    "HANO",
     "FNO2d",
     "DilResNet",
     "dCNN",
@@ -30,8 +31,8 @@ __all__ = [
     "ReduceLayer",
     "DecomposeLayer",
     "FeedForward",
-    "SpectralConv2d",
-    "Decodermap",
-    "HAttention",
+    "Conv2dAttention",
+    "Restrict",
+    "MgConv_DC_3",
     "SpectralConv2d_FNO",
 ]
