@@ -1,0 +1,20 @@
+# Data and outputs
+data/
+results/
+models/*.pt
+models/*.pkl
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Env
+.env
+*.env
