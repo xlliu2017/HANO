@@ -101,15 +101,15 @@ class MultigridAttentionBlock(nn.Module):
 
     def __init__(
         self,
-        num_iteration,
+        num_iterations,
         num_state_channels,
         num_feature_channels,
         padding_mode="zeros",
         bias=True,
     ):
         super().__init__()
-        self.num_iteration = [tuple(iteration) for iteration in num_iteration]
-        self.num_levels = len(self.num_iteration)
+        self.num_iterations = [tuple(iteration) for iteration in num_iterations]
+        self.num_levels = len(self.num_iterations)
         self.num_state_channels = num_state_channels
 
         self.pre_smoothers = nn.ModuleList()
@@ -117,12 +117,12 @@ class MultigridAttentionBlock(nn.Module):
         self.restrictions = nn.ModuleList()
         self.upsamplers = nn.ModuleList()
 
-        for level, (pre_smooth_steps, post_smooth_steps) in enumerate(self.num_iteration):
+        for level, (pre_smooth_steps, post_smooth_steps) in enumerate(self.num_iterations):
             level_channels = (level + 1) * num_feature_channels
             if level == 0 and pre_smooth_steps < 1:
                 raise ValueError(
                     "The first multigrid level requires at least one pre-smoothing step "
-                    "(num_iteration[0][0] must be >= 1)."
+                    "(set num_iterations[0][0] >= 1 in the config)."
                 )
 
             self.pre_smoothers.append(
@@ -246,7 +246,7 @@ class HANO2d(nn.Module):
         self.latent_channels = config.get("feature_dim", 24)
         self.output_dim = config.get("output_dim", 1)
         self.num_layers = config.get("num_layer", 1)
-        self.num_iteration = self._resolve_num_iteration(config)
+        self.num_iterations = self._resolve_num_iterations(config)
         self.normalizer = config.get("y_norm")
         self.use_input_residual = config.get("use_input_residual", False)
 
@@ -268,7 +268,7 @@ class HANO2d(nn.Module):
         self.multigrid_blocks = nn.ModuleList(
             [
                 MultigridAttentionBlock(
-                    num_iteration=self.num_iteration,
+                    num_iterations=self.num_iterations,
                     num_state_channels=self.latent_channels,
                     num_feature_channels=self.latent_channels,
                     padding_mode=self.padding_mode,
@@ -278,7 +278,8 @@ class HANO2d(nn.Module):
             ]
         )
 
-        if config.get("last_layer", "conv") == "conv":
+        last_layer = config.get("last_layer", "conv") or "conv"
+        if last_layer == "conv":
             self.output_projection = nn.Conv2d(
                 self.latent_channels,
                 self.output_dim,
@@ -287,7 +288,7 @@ class HANO2d(nn.Module):
                 bias=config.get("bias", False),
                 padding_mode=self.padding_mode,
             )
-        elif config.get("last_layer") == "linear":
+        elif last_layer == "linear":
             self.output_projection = nn.Conv2d(self.latent_channels, self.output_dim, kernel_size=1, bias=False)
         else:
             raise NameError('invalid last_layer: must be "conv" or "linear"')
@@ -312,7 +313,9 @@ class HANO2d(nn.Module):
         raise NameError('invalid activation: must be one of "relu", "gelu", "tanh", or "silu"')
 
     @staticmethod
-    def _resolve_num_iteration(config):
+    def _resolve_num_iterations(config):
+        if "num_iterations" in config:
+            return [tuple(iteration) for iteration in config["num_iterations"]]
         if "num_iteration" in config:
             return [tuple(iteration) for iteration in config["num_iteration"]]
 
@@ -337,6 +340,8 @@ class HANO2d(nn.Module):
         if self.input_projection is not None:
             output = output + self.input_projection(x)
 
+        # The stored dataset normalizer operates on scalar solution fields, so we
+        # only apply it when the model is configured to predict a single channel.
         if self.normalizer is not None and self.output_dim == 1:
             output = self.normalizer.decode(output.squeeze(1)).unsqueeze(1)
 

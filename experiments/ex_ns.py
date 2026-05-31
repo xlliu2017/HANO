@@ -37,7 +37,7 @@ if __name__ == "__main__":
     r_dic["epochs"] = 500
     r_dic["feature_dim"] = 18
     r_dic["num_layer"] = 1
-    r_dic["num_iteration"] = [[1, 0], [1, 0], [1, 0]]
+    r_dic["num_iterations"] = [[1, 0], [1, 0], [1, 0]]
     r_dic["padding_mode"] = "circular"
     r_dic["activation"] = "gelu"
     r_dic["last_layer"] = "conv"
