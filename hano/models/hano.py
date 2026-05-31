@@ -104,7 +104,14 @@ class TupleIdentity(nn.Module):
 
 
 class MultigridAttentionBlock(nn.Module):
-    """Encoder-decoder style multigrid block used by the updated HANO model."""
+    """Multigrid V-cycle style block used by the updated HANO model.
+
+    ``num_iterations`` stores ``(pre_smoothing_steps, post_smoothing_steps)``
+    pairs for each grid level. The forward pass first applies the pre-smoothing
+    attention updates while moving from fine to coarse grids, then reconstructs
+    the finest state with transpose-convolution upsampling and optional
+    post-smoothing attention at each level.
+    """
 
     def __init__(
         self,
@@ -129,7 +136,7 @@ class MultigridAttentionBlock(nn.Module):
             if level == 0 and pre_smooth_steps < 1:
                 raise ValueError(
                     "The first multigrid level requires at least one pre-smoothing step "
-                    "(set num_iterations[0][0] >= 1 in the config)."
+                    "(set num_iterations[0][0] >= 1; legacy configs may still use num_iteration[0][0])."
                 )
 
             self.pre_smoothers.append(
@@ -354,6 +361,8 @@ class HANO2d(nn.Module):
         if self.normalizer is not None and self.output_dim == 1:
             output = self.normalizer.decode(output.squeeze(1)).unsqueeze(1)
 
+        # Dirichlet padding removes the boundary, so both spatial dimensions must
+        # be larger than two to keep a non-empty interior after slicing.
         if self.boundary_condition == "dirichlet" and output.shape[-2] > 2 and output.shape[-1] > 2:
             interior = output[:, :, 1:-1, 1:-1].contiguous()
             output = F.pad(interior, (1, 1, 1, 1), "constant", 0)
