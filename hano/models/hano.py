@@ -11,7 +11,7 @@ import torch.nn.functional as F
 
 
 # Each pair is (pre_smoothing_steps, post_smoothing_steps) for one multigrid level.
-DEFAULT_NUM_ITERATION = ((1, 0), (1, 0), (1, 0))
+DEFAULT_NUM_ITERATIONS = ((1, 0), (1, 0), (1, 0))
 
 
 def _resolve_group_count(num_channels, preferred_groups=4):
@@ -259,6 +259,8 @@ class HANO2d(nn.Module):
         self.input_channels = config.get("in_dim", 1)
         self.latent_channels = config.get("feature_dim", 24)
         self.output_dim = config.get("output_dim", 1)
+        # Keep supporting the legacy singular key until older experiment files
+        # have fully migrated to `num_layers`.
         self.num_layers = config.get("num_layers", config.get("num_layer", 1))
         self.num_iterations = self._resolve_num_iterations(config)
         self.normalizer = config.get("y_norm")
@@ -342,7 +344,7 @@ class HANO2d(nn.Module):
             # post-smoothing count to zero for backward compatibility.
             return [(int(depth), 0) for depth in depths]
 
-        return [tuple(iteration) for iteration in DEFAULT_NUM_ITERATION]
+        return [tuple(iteration) for iteration in DEFAULT_NUM_ITERATIONS]
 
     def forward(self, x):
         features = self.patch_embedding(x)
