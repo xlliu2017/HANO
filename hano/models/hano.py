@@ -96,6 +96,13 @@ class RestrictionBlock(nn.Module):
         )
 
 
+class TupleIdentity(nn.Module):
+    """Identity helper that makes tuple-valued stages explicit."""
+
+    def forward(self, x):
+        return x
+
+
 class MultigridAttentionBlock(nn.Module):
     """Encoder-decoder style multigrid block used by the updated HANO model."""
 
@@ -154,7 +161,7 @@ class MultigridAttentionBlock(nn.Module):
                 )
                 for _ in range(post_smooth_steps)
             ]
-            self.post_smoothers.append(nn.Sequential(*post_smoothers) if post_smoothers else nn.Identity())
+            self.post_smoothers.append(nn.Sequential(*post_smoothers) if post_smoothers else TupleIdentity())
 
             if level < self.num_levels - 1:
                 current_channels = (level + 1) * num_state_channels
@@ -245,7 +252,7 @@ class HANO2d(nn.Module):
         self.input_channels = config.get("in_dim", 1)
         self.latent_channels = config.get("feature_dim", 24)
         self.output_dim = config.get("output_dim", 1)
-        self.num_layers = config.get("num_layer", 1)
+        self.num_layers = config.get("num_layers", config.get("num_layer", 1))
         self.num_iterations = self._resolve_num_iterations(config)
         self.normalizer = config.get("y_norm")
         self.use_input_residual = config.get("use_input_residual", False)
@@ -317,6 +324,8 @@ class HANO2d(nn.Module):
         if "num_iterations" in config:
             return [tuple(iteration) for iteration in config["num_iterations"]]
         if "num_iteration" in config:
+            # Keep supporting the legacy singular key until older experiment
+            # scripts and checkpoints have fully migrated.
             return [tuple(iteration) for iteration in config["num_iteration"]]
 
         depths = config.get("depths")

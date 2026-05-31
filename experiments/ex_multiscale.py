@@ -40,7 +40,7 @@ if __name__ == "__main__":
     # HANO multigrid-attention backbone.
     r_dic["epochs"] = 300
     r_dic["feature_dim"] = 64
-    r_dic["num_layer"] = 1
+    r_dic["num_layers"] = 1
     r_dic["num_iterations"] = [[2, 0], [4, 0], [2, 0]]
     r_dic["padding_mode"] = "zeros"
     r_dic["activation"] = "gelu"
