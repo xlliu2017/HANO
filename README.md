@@ -13,29 +13,30 @@
 
 Neural operators learn mappings between infinite-dimensional function spaces and have emerged as powerful surrogate solvers for PDEs. However, standard spectral-based operators (e.g., FNO) suffer from **spectral bias** — they preferentially fit low-frequency components and struggle with multiscale or rough solutions.
 
-**HANO** addresses this by combining:
-- A **hierarchical window-attention encoder** that captures multiscale spatial features without spectral bias.
-- A **Fourier Neural Operator decoder** that maps the encoded representation back to the output function space.
+**HANO** now uses a **multigrid-attention backbone**:
+- A **patch embedding stem** lifts the input field into a latent channel space.
+- A stack of **multigrid attention blocks** performs local attention updates, restricts the state to coarser resolutions, and upsamples it back to the finest grid.
+- A **final convolution head** maps the refined latent state back to the target field.
 
-The encoder follows a Swin-Transformer-style hierarchy: it progressively *merges* patches (reducing spatial resolution while increasing channel depth) and then *decomposes* them back up to reconstruct fine-scale features.
+Each multigrid block follows a coarse-to-fine hierarchy: it applies attention updates at the current level, restricts the state to the next coarser level, and then reconstructs the fine-scale prediction with transpose-convolution skip connections.
 
 ```
 Input field (B, 1, H, W)
        │
   PatchEmbed (Conv2d)
        │
-  HAttention
-  ├─ ReduceLayer[0] → WindowAttention + PatchMerging
-  ├─ ReduceLayer[1] → WindowAttention (bottleneck)
-  └─ DecomposeLayer (upsample & merge residuals)
+ MultigridAttentionBlock × N
+ ├─ Attention smoothing at each level
+ ├─ Restriction to coarser grids
+ └─ Transposed-conv reconstruction to fine grids
        │
-  Decodermap (FNO-style spectral conv layers)
+ Output projection (Conv2d)
        │
 Output field (B, H_out, W_out, 1)
 ```
 
 ### Why does it work?
-Attention operates in **spatial windows** rather than in the global Fourier domain, so the model does not inherently favor low-frequency modes. The hierarchical design lets it capture both global structure (coarse scale) and local detail (fine scale) simultaneously.
+Attention still operates locally in the spatial domain, so the model does not inherit the low-frequency bias of purely spectral decoders. The multigrid hierarchy lets the network exchange information across coarse and fine resolutions while keeping the implementation fully convolutional.
 
 ---
 
