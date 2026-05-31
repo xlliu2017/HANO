@@ -1,11 +1,11 @@
 # HANO — Hierarchical Attention Neural Operator
-### NeurIPS 2023 · Mitigating Spectral Bias for Multiscale Operator Learning
+### Journal of Computational Physics (2024) · Mitigating Spectral Bias for Multiscale Operator Learning
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://python.org)
 [![PyTorch](https://img.shields.io/badge/PyTorch-1.12+-red.svg)](https://pytorch.org)
 
-> **Paper:** [Mitigating spectral bias for the multiscale operator learning with hierarchical attention](https://arxiv.org/abs/2210.10890) — NeurIPS 2023
+> **Featured paper:** Liu, X., Xu, B., Cao, S., & Zhang, L. (2024). *Mitigating spectral bias for the multiscale operator learning*. Journal of Computational Physics, 506, 112944. ([ScienceDirect](https://doi.org/10.1016/j.jcp.2024.112944))
 
 ---
 
@@ -45,7 +45,7 @@ Attention still operates locally in the spatial domain, so the model does not in
 ```
 HANO/
 ├── hano/                  # Core Python package
-│   ├── models/            # HANO2d, FNO2d, DilResNet + shared components
+│   ├── models/            # Active multigrid HANO/FNO models and legacy HANO snapshot
 │   ├── losses.py          # H¹ (Sobolev) loss and Lp loss
 │   ├── data.py            # Dataset loaders and normalizers
 │   ├── trainer.py         # Training & evaluation loops
@@ -107,6 +107,8 @@ Download from [Google Drive](https://drive.google.com/drive/folders/1Tnjh7Vnr_lm
 
 ## Training
 
+The experiment entrypoints under `experiments/` remain the supported training interface. The previous hierarchical-transformer + spectral-decoder stack is preserved in `hano/models/hano_legacy.py` for reference.
+
 ```bash
 # Darcy smooth  (res = 211)
 python experiments/ex_darcysmooth.py
@@ -166,14 +168,17 @@ Quantitative comparison (relative L² and H¹ errors) against baselines:
 
 ## Citation
 
-If you use this code or paper, please cite:
+If you use this code, please cite:
 
 ```bibtex
-@inproceedings{liu2023hano,
-  title     = {Mitigating spectral bias for the multiscale operator learning with hierarchical attention},
-  author    = {Liu, Xinliang and others},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  year      = {2023}
+@article{liu2024mitigating,
+  title   = {Mitigating spectral bias for the multiscale operator learning},
+  author  = {Liu, X. and Xu, B. and Cao, S. and Zhang, L.},
+  journal = {Journal of Computational Physics},
+  volume  = {506},
+  pages   = {112944},
+  year    = {2024},
+  doi     = {10.1016/j.jcp.2024.112944}
 }
 ```
 
