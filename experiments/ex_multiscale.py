@@ -37,17 +37,14 @@ if __name__ == "__main__":
     r_dic["res_att"] = int((r_dic["res_input"] - r_dic["patch_size"] + 2 * r_dic["patch_padding"]) / r_dic["subsample_attn"] + 1)
     r_dic["res_output"] = 256
 
+    # HANO multigrid-attention backbone.
     r_dic["epochs"] = 300
     r_dic["feature_dim"] = 64
-    r_dic["window_size"] = [4, 4, 4]
-    r_dic["depths"] = [2, 4, 2]
-    r_dic["num_heads"] = [1, 1, 1]
-
-    r_dic["F_modes"] = 16
-    r_dic["F_width"] = 64
-    r_dic["num_spectral_layers"] = 5
-    r_dic["mlp_hidden_dim"] = 128
-    r_dic["F_padding"] = 5
+    r_dic["num_layers"] = 1
+    r_dic["num_iterations"] = [[2, 0], [4, 0], [2, 0]]
+    r_dic["padding_mode"] = "zeros"
+    r_dic["activation"] = "gelu"
+    r_dic["last_layer"] = "conv"
 
     r_dic["model_save_path"] = MODEL_PATH
     r_dic["model_name"] = "multiscale_res256.pt"

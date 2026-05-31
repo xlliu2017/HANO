@@ -1,5 +1,5 @@
 # HANO — Hierarchical Attention Neural Operator
-### Journal of Computational Physics (2024) · Mitigating spectral bias for the multiscale operator learning
+### Journal of Computational Physics (2024) · Mitigating Spectral Bias for Multiscale Operator Learning
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://python.org)
@@ -11,31 +11,32 @@
 
 ## Overview
 
-Neural operators learn mappings between infinite-dimensional function spaces and have emerged as powerful surrogate solvers for PDEs. Standard Fourier-based operators can struggle on rough or multiscale targets because they preferentially fit low-frequency structure.
+Neural operators learn mappings between infinite-dimensional function spaces and have emerged as powerful surrogate solvers for PDEs. However, standard spectral-based operators (e.g., FNO) suffer from **spectral bias** — they preferentially fit low-frequency components and struggle with multiscale or rough solutions.
 
-The active **HANO** implementation in this repository now tracks the upstream [`xlliu2017/vFMM`](https://github.com/xlliu2017/vFMM/) release. It combines:
-- a **hierarchical transformer encoder** (`HTransformer`) that extracts multiscale spatial features through local window attention and patch merging, and
-- a **spectral decoder** (`SpectralDecoder`) that maps the encoded representation back to the solution field.
+**HANO** now uses a **multigrid-attention backbone**:
+- A **patch embedding stem** lifts the input field into a latent channel space.
+- A stack of **multigrid attention blocks** performs local attention updates, restricts the state to coarser resolutions, and upsamples it back to the finest grid.
+- A **final convolution head** maps the refined latent state back to the target field.
+
+Each multigrid block follows a coarse-to-fine hierarchy: it applies attention updates at the current level, restricts the state to the next coarser level, and then reconstructs the fine-scale prediction with transpose-convolution skip connections.
 
 ```
-Input field (B, C, H, W)
+Input field (B, 1, H, W)
        │
-PatchEmbed → q/k/v patch tokens
+  PatchEmbed (Conv2d)
        │
-Hierarchical Transformer
-├─ HBasicLayer[0]
-├─ PatchMerging ↓
-├─ HBasicLayer[1]
-├─ PatchMerging ↓
-├─ HBasicLayer[2]
-└─ multilevel up-merge
+ MultigridAttentionBlock × N
+ ├─ Attention smoothing at each level
+ ├─ Restriction to coarser grids
+ └─ Transposed-conv reconstruction to fine grids
        │
-SpectralDecoder
+ Output projection (Conv2d)
        │
 Output field (B, H_out, W_out, 1)
 ```
 
-The previous repository-local HANO encoder/decoder stack is still available in `hano/models/hano_legacy.py` for reference.
+### Why does it work?
+Attention still operates locally in the spatial domain, so the model does not inherit the low-frequency bias of purely spectral decoders. The multigrid hierarchy lets the network exchange information across coarse and fine resolutions while keeping the implementation fully convolutional.
 
 ---
 
@@ -44,7 +45,7 @@ The previous repository-local HANO encoder/decoder stack is still available in `
 ```
 HANO/
 ├── hano/                  # Core Python package
-│   ├── models/            # Active HANO/FNO models and legacy HANO snapshot
+│   ├── models/            # Active multigrid HANO/FNO models and legacy HANO snapshot
 │   ├── losses.py          # H¹ (Sobolev) loss and Lp loss
 │   ├── data.py            # Dataset loaders and normalizers
 │   ├── trainer.py         # Training & evaluation loops
@@ -60,11 +61,11 @@ HANO/
 
 ## Installation
 
-### Option A — pip
+### Option A — pip (editable)
 ```bash
 git clone https://github.com/xlliu2017/HANO.git
 cd HANO
-pip install -r requirements.txt
+pip install -e .          # or: pip install -r requirements.txt
 ```
 
 ### Option B — conda
@@ -73,7 +74,7 @@ conda env create -f environment.yml
 conda activate hano
 ```
 
-**Core dependencies:** PyTorch, timm, scipy, h5py, tqdm, torchinfo.
+**Core dependencies:** PyTorch ≥ 1.12, timm, scipy, h5py, tqdm, torchinfo.
 
 ---
 
@@ -106,16 +107,16 @@ Download from [Google Drive](https://drive.google.com/drive/folders/1Tnjh7Vnr_lm
 
 ## Training
 
-The experiment entrypoints under `experiments/` continue to be the supported training interface. They now instantiate the upstream vFMM HANO model through the repository's `HANO` / `HANO2d` API.
+The experiment entrypoints under `experiments/` remain the supported training interface. The previous hierarchical-transformer + spectral-decoder stack is preserved in `hano/models/hano_legacy.py` for reference.
 
 ```bash
-# Darcy smooth (res = 211)
+# Darcy smooth  (res = 211)
 python experiments/ex_darcysmooth.py
 
-# Darcy rough (res = 256)
+# Darcy rough   (res = 256)
 python experiments/ex_darcyrough.py
 
-# Multiscale trigonometric coefficient (res = 256)
+# Multiscale trigonometric coefficient  (res = 256)
 python experiments/ex_multiscale.py
 
 # Navier–Stokes
@@ -125,7 +126,7 @@ python experiments/ex_ns.py
 python experiments/ex_fno_multiscale.py
 ```
 
-Checkpoints and training logs are saved to `./models/`. The backward-compatible wrappers `train.py` and `scripts/train.py` remain available for older workflows.
+Checkpoints and training logs are saved to `./models/`.
 
 ---
 
