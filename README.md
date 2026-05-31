@@ -11,31 +11,31 @@
 
 ## Overview
 
-Neural operators learn mappings between infinite-dimensional function spaces and have emerged as powerful surrogate solvers for PDEs. However, standard spectral-based operators (e.g., FNO) suffer from **spectral bias** — they preferentially fit low-frequency components and struggle with multiscale or rough solutions.
+Neural operators learn mappings between infinite-dimensional function spaces and have emerged as powerful surrogate solvers for PDEs. Standard Fourier-based operators can struggle on rough or multiscale targets because they preferentially fit low-frequency structure.
 
-**HANO** addresses this by combining:
-- A **hierarchical window-attention encoder** that captures multiscale spatial features without spectral bias.
-- A **Fourier Neural Operator decoder** that maps the encoded representation back to the output function space.
-
-The encoder follows a Swin-Transformer-style hierarchy: it progressively *merges* patches (reducing spatial resolution while increasing channel depth) and then *decomposes* them back up to reconstruct fine-scale features.
+The active **HANO** implementation in this repository now tracks the upstream [`xlliu2017/vFMM`](https://github.com/xlliu2017/vFMM/) release. It combines:
+- a **hierarchical transformer encoder** (`HTransformer`) that extracts multiscale spatial features through local window attention and patch merging, and
+- a **spectral decoder** (`SpectralDecoder`) that maps the encoded representation back to the solution field.
 
 ```
-Input field (B, 1, H, W)
+Input field (B, C, H, W)
        │
-  PatchEmbed (Conv2d)
+PatchEmbed → q/k/v patch tokens
        │
-  HAttention
-  ├─ ReduceLayer[0] → WindowAttention + PatchMerging
-  ├─ ReduceLayer[1] → WindowAttention (bottleneck)
-  └─ DecomposeLayer (upsample & merge residuals)
+Hierarchical Transformer
+├─ HBasicLayer[0]
+├─ PatchMerging ↓
+├─ HBasicLayer[1]
+├─ PatchMerging ↓
+├─ HBasicLayer[2]
+└─ multilevel up-merge
        │
-  Decodermap (FNO-style spectral conv layers)
+SpectralDecoder
        │
 Output field (B, H_out, W_out, 1)
 ```
 
-### Why does it work?
-Attention operates in **spatial windows** rather than in the global Fourier domain, so the model does not inherently favor low-frequency modes. The hierarchical design lets it capture both global structure (coarse scale) and local detail (fine scale) simultaneously.
+The previous repository-local HANO encoder/decoder stack is still available in `hano/models/hano_legacy.py` for reference.
 
 ---
 
@@ -44,7 +44,7 @@ Attention operates in **spatial windows** rather than in the global Fourier doma
 ```
 HANO/
 ├── hano/                  # Core Python package
-│   ├── models/            # HANO2d, FNO2d, DilResNet + shared components
+│   ├── models/            # Active HANO/FNO models and legacy HANO snapshot
 │   ├── losses.py          # H¹ (Sobolev) loss and Lp loss
 │   ├── data.py            # Dataset loaders and normalizers
 │   ├── trainer.py         # Training & evaluation loops
@@ -73,7 +73,7 @@ conda env create -f environment.yml
 conda activate hano
 ```
 
-**Core dependencies:** PyTorch ≥ 1.12, timm, scipy, h5py, tqdm, torchinfo.
+**Core dependencies:** PyTorch, timm, scipy, h5py, tqdm, torchinfo.
 
 ---
 
@@ -106,14 +106,16 @@ Download from [Google Drive](https://drive.google.com/drive/folders/1Tnjh7Vnr_lm
 
 ## Training
 
+The experiment entrypoints under `experiments/` continue to be the supported training interface. They now instantiate the upstream vFMM HANO model through the repository's `HANO` / `HANO2d` API.
+
 ```bash
-# Darcy smooth  (res = 211)
+# Darcy smooth (res = 211)
 python experiments/ex_darcysmooth.py
 
-# Darcy rough   (res = 256)
+# Darcy rough (res = 256)
 python experiments/ex_darcyrough.py
 
-# Multiscale trigonometric coefficient  (res = 256)
+# Multiscale trigonometric coefficient (res = 256)
 python experiments/ex_multiscale.py
 
 # Navier–Stokes
@@ -123,7 +125,7 @@ python experiments/ex_ns.py
 python experiments/ex_fno_multiscale.py
 ```
 
-Checkpoints and training logs are saved to `./models/`.
+Checkpoints and training logs are saved to `./models/`. The backward-compatible wrappers `train.py` and `scripts/train.py` remain available for older workflows.
 
 ---
 

@@ -1,37 +1,38 @@
 """Backward-compatible imports for model classes."""
 
-from hano.models import DilResNet, FNO2d, HANO, HANO2d
+from hano.models import DilResNet, FNO2d, HANO, HANO2d, LegacyHANO, LegacyHANO2d
 from hano.models.baselines import dCNN
-from hano.models.components import (
-    DecomposeLayer,
+from hano.models.hano import (
     FeedForward,
+    HTransformer,
     Mlp,
     PatchEmbed,
     PatchMerging,
-    ReduceLayer,
-    WindowAttention,
+    SpectralConv2d,
+    SpectralDecoder,
     window_partition,
     window_reverse,
 )
+from hano.models.hano_legacy import Decodermap, HAttention
 from hano.models.fno import SpectralConv2d_FNO
-from hano.models.hano import Decodermap, HAttention, SpectralConv2d
 
 __all__ = [
     "HANO2d",
     "HANO",
+    "LegacyHANO2d",
+    "LegacyHANO",
     "FNO2d",
     "DilResNet",
     "dCNN",
     "Mlp",
     "window_partition",
     "window_reverse",
-    "WindowAttention",
     "PatchEmbed",
     "PatchMerging",
-    "ReduceLayer",
-    "DecomposeLayer",
     "FeedForward",
     "SpectralConv2d",
+    "SpectralDecoder",
+    "HTransformer",
     "Decodermap",
     "HAttention",
     "SpectralConv2d_FNO",
