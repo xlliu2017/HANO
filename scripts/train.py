@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from hano.trainer import train_NS_model, train_model
 
-SRC_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__), "..") )
+SRC_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 DATA_PATH = os.path.join(SRC_ROOT, "data")
 MODEL_PATH = os.path.join(SRC_ROOT, "models")
 

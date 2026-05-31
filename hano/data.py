@@ -35,7 +35,7 @@ class MatReader(object):
         try:
             self.data = scipy.io.loadmat(self.file_path)
             self.old_mat = True
-        except Exception:
+        except (OSError, ValueError, NotImplementedError):
             self.data = h5py.File(self.file_path, "r")
             self.old_mat = False
 
@@ -113,7 +113,6 @@ class UnitGaussianNormalizer(nn.Module):
         super().__init__()
 
         self.register_buffer("mean", torch.mean(x, 0))
-        self.register_buffer("std", torch.std(x, 0))
         self.register_buffer("std", torch.std(x, 0))
         self.eps = eps
 

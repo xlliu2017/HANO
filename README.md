@@ -5,7 +5,7 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://python.org)
 [![PyTorch](https://img.shields.io/badge/PyTorch-1.12+-red.svg)](https://pytorch.org)
 
-> **Paper:** [Mitigating spectral bias for the multiscale operator learning with hierarchical attention](https://arxiv.org/...) — NeurIPS 2023
+> **Paper:** [Mitigating spectral bias for the multiscale operator learning with hierarchical attention](https://arxiv.org/abs/2210.10890) — NeurIPS 2023
 
 ---
 

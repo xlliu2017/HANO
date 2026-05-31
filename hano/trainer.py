@@ -107,10 +107,10 @@ def test_ns(model, test_loader, loss_func, test_len, T, device):
     for xx, yy in test_loader:
         loss = 0
         batch_size = xx.shape[0]
-        history = xx.to(device)
+        xx = xx.to(device)
         yy = yy.to(device)
         for t in range(T):
-            x = history.permute(0, 3, 1, 2)
+            x = xx.permute(0, 3, 1, 2)
             y = yy[..., t : t + 1]
             im = model(x)
             loss += loss_func(im.reshape(batch_size, -1), y.reshape(batch_size, -1))
@@ -120,7 +120,7 @@ def test_ns(model, test_loader, loss_func, test_len, T, device):
             else:
                 pred = torch.cat((pred, im), -1)
 
-            history = torch.cat((history[..., 1:], im), dim=-1)
+            xx = torch.cat((xx[..., 1:], im), dim=-1)
 
         lossl2_full = loss_func(pred.reshape(batch_size, -1), yy.reshape(batch_size, -1))
 
