@@ -1,4 +1,4 @@
-name: FMM
+name: hano
 channels:
   - plotly
   - pytorch
