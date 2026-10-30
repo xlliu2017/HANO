@@ -72,9 +72,14 @@ HANO/
 │   ├── data.py            # Dataset loaders and normalizers
 │   ├── trainer.py         # Training & evaluation loops
 │   └── utils.py           # Logging helpers
-├── experiments/           # Experiment entry-point scripts
-├── scripts/               # train.py / eval.py CLI wrappers
+├── experiments/           # Experiment configurations and entry points
+│   └── common.py          # Shared paths and derived configuration settings
+├── scripts/               # General training and evaluation scripts
+├── tests/                 # Experiment configuration and entry-point checks
 ├── spectral_bias/         # Spectral bias analysis notebook & data
+├── ex_*.py, FNO_multiscale.py  # Backward-compatible experiment entry points
+├── models.py, train.py, utils.py, T_lossfunc.py  # Backward-compatible exports
+├── eval.py                # Backward-compatible evaluation entry point
 ├── environment.yml
 └── requirements.txt
 ```
@@ -124,6 +129,8 @@ No pretrained checkpoints are tracked in this repository. The experiment scripts
 The experiment scripts use the active multigrid-attention model for HANO runs. Run a script from the repository root after placing its input data in `./data/`:
 
 ```bash
+mkdir -p models results
+
 # Darcy smooth  (res = 211)
 python experiments/ex_darcysmooth.py
 
@@ -141,6 +148,11 @@ python experiments/ex_fno_multiscale.py
 ```
 
 Model weights and result pickles are saved under `./models/`.
+Each experiment's settings are in its `build_config()` function; shared path,
+grid-size, and output-name calculations are in `experiments/common.py`.
+The root-level experiment scripts remain available as compatibility entry points.
+`scripts/train.py` provides separate Darcy rough and Navier–Stokes configurations
+via `--task`; these are not the same configurations as the experiment scripts.
 
 ---
 
@@ -163,6 +175,17 @@ spectral_bias/spectral_bias_dynamics.ipynb
 ```
 
 Precomputed dynamics data (`.npz`) for FNO, HANO, MWT, and UNO are included.
+
+---
+
+## Tests
+
+The experiment configuration and entry-point checks use the Python standard
+library and do not require datasets or model dependencies:
+
+```bash
+python -m unittest discover -s tests
+```
 
 ---
 

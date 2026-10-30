@@ -4,13 +4,10 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from hano.trainer import train_model
-
-SRC_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-DATA_PATH = os.path.join(SRC_ROOT, "data")
-MODEL_PATH = os.path.join(SRC_ROOT, "models")
+from experiments.common import DATA_PATH, MODEL_PATH, SRC_ROOT, set_output_names
 
 
-if __name__ == "__main__":
+def build_config():
     r_dic = {}
 
     r_dic["model"] = "FNO"
@@ -39,11 +36,12 @@ if __name__ == "__main__":
     r_dic["feature_dim"] = 32
     r_dic["FNO_modes"] = 12
 
-    r_dic["model_save_path"] = MODEL_PATH
-    r_dic["model_name"] = "FNO_multiscale_res256.pt"
-    r_dic["result_name"] = str(r_dic["model_name"][0:-3]) + ".pkl"
-    r_dic["mat_name"] = str(r_dic["model_name"][0:-3]) + ".mat"
+    set_output_names(r_dic, "FNO_multiscale_res256.pt")
+    return r_dic
 
+
+if __name__ == "__main__":
+    r_dic = build_config()
     print(r_dic)
     train_model(r_dic)
 

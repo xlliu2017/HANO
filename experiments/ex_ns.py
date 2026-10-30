@@ -4,13 +4,12 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from hano.trainer import train_NS_model
+from experiments.common import (
+    DATA_PATH, MODEL_PATH, SRC_ROOT, set_attention_resolutions, set_output_names,
+)
 
-SRC_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-DATA_PATH = os.path.join(SRC_ROOT, "data")
-MODEL_PATH = os.path.join(SRC_ROOT, "models")
 
-
-if __name__ == "__main__":
+def build_config():
     r_dic = {}
     r_dic["train_path"] = "NavierStokes_V1e-5_N1200_T20.mat"
     r_dic["test_path"] = "NavierStokes_V1e-5_N1200_T20.mat"
@@ -29,8 +28,7 @@ if __name__ == "__main__":
     r_dic["subsample_attn"] = 1
     r_dic["patch_padding"] = 1
     r_dic["patch_size"] = 3
-    r_dic["res_input"] = int((r_dic["resolution_datasets"] - 1) / r_dic["subsample_nodes"] + 1)
-    r_dic["res_att"] = int((r_dic["res_input"] - r_dic["patch_size"] + 2 * r_dic["patch_padding"]) / r_dic["subsample_attn"] + 1)
+    set_attention_resolutions(r_dic)
     r_dic["res_output"] = 64
 
     # HANO multigrid-attention backbone.
@@ -42,11 +40,12 @@ if __name__ == "__main__":
     r_dic["activation"] = "gelu"
     r_dic["last_layer"] = "conv"
 
-    r_dic["model_save_path"] = MODEL_PATH
-    r_dic["model_name"] = "NS_1e-5_N1200.pt"
-    r_dic["result_name"] = str(r_dic["model_name"][0:-3]) + ".pkl"
-    r_dic["mat_name"] = str(r_dic["model_name"][0:-3]) + ".mat"
+    set_output_names(r_dic, "NS_1e-5_N1200.pt")
+    return r_dic
 
+
+if __name__ == "__main__":
+    r_dic = build_config()
     print(r_dic)
     train_NS_model(r_dic)
 
