@@ -112,8 +112,8 @@ The experiment scripts expect the following MATLAB files under `./data/`. They a
 | Experiment | Files | Download |
 |---|---|---|
 | Darcy smooth | `piececonst_r421_N1024_smooth1.mat`, `piececonst_r421_N1024_smooth2.mat` | [Google Drive](https://drive.google.com/drive/folders/1UnbQh2WWc6knEHbLn-ZaXrKUZhp7pjt-?usp=sharing) |
-| Darcy rough | `darcy_rough_train.mat`, `darcy_rough_val.mat`, `darcy_rough_test.mat` | [Google Drive](https://drive.google.com/drive/folders/1ovfK0CV6n_UUqt4tAtaxo_-9nRshhZC7?usp=sharing) |
-| Multiscale trig. coeff. | `mul_tri_{train,val,test}.mat` | [Google Drive](https://drive.google.com/drive/folders/1ovfK0CV6n_UUqt4tAtaxo_-9nRshhZC7?usp=sharing) |
+| Darcy rough | `darcy_rough_train.mat`, `darcy_rough_val.mat`, `darcy_rough_test.mat` | [Google Drive](https://drive.google.com/drive/folders/1l9wRuyRrZgyJ9-Q0UXd1WPvlN8eDHpMc?usp=sharing) |
+| Multiscale trig. coeff. | `mul_tri_{train,val,test}.mat` | [Google Drive](https://drive.google.com/drive/folders/1l9wRuyRrZgyJ9-Q0UXd1WPvlN8eDHpMc?usp=sharing) |
 | Navier–Stokes | `NavierStokes_V1e-5_N1200_T20.mat` | [Google Drive](https://drive.google.com/drive/folders/1UnbQh2WWc6knEHbLn-ZaXrKUZhp7pjt-?usp=sharing) |
 
 ---
